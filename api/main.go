@@ -46,6 +46,6 @@ func InitializeDB() (*database.DB, error) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	db.CreateTables()
+	db.InitSchema()
 	return db, err
 }

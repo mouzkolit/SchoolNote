@@ -32,7 +32,7 @@ func (d *DB) Close() error {
 }
 
 // Creates the base tables for the application
-func (d *DB) CreateTables() {
+func (d *DB) InitSchema() {
 	ctx := context.Background()
 	models := []interface{}{
 		(*models.Pupil)(nil),
