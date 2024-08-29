@@ -1,0 +1,120 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "A School Notes service API Backend in GOlang",
+        "title": "School Notebook API",
+        "contact": {
+            "name": "Maximilian Zeidler PhD",
+            "email": "maximilian.zeidler@outlook.com"
+        },
+        "version": "0.1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/",
+    "paths": {
+        "/pupil": {
+            "post": {
+                "description": "Creates A Pupil in a Class",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "pupil"
+                ],
+                "summary": "Creates A Pupil in a Class",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Name of the Pupil",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "LastName of the Pupil",
+                        "name": "lastName",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.PupilResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/pupil/{id}": {
+            "get": {
+                "description": "Gets a Pupil from a Class",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "pupil"
+                ],
+                "summary": "Retrieves a pupil from the path",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID of the Pupil",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.PupilResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/pupils": {
+            "get": {
+                "description": "Retrieves all Pupils from the school",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Pupils"
+                ],
+                "summary": "Retrieves all Pupils",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.PupilResponse"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "models.PupilResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}
