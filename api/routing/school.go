@@ -2,6 +2,7 @@ package routing
 
 import (
 	"log"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/mouzkolit/GOCli/database"
@@ -15,8 +16,14 @@ func CreateSchool(r *gin.Engine, db *database.DB) {
 		schoolPlace := c.Query("place")
 		schoolWeb := c.Query("web")
 
-		db.CreateSchool(name, schoolPlace, schoolWeb)
-		err := CreateSchoolLogin(db, name)
+		err := db.CreateSchool(name, schoolPlace, schoolWeb)
+		if err != nil {
+			c.JSON(500, gin.H{
+				"message": "Error creating school",
+			})
+			return
+		}
+		err = CreateSchoolLogin(db, name)
 		if err != nil {
 			c.JSON(500, gin.H{
 				"message": "Error creating school login",
@@ -24,7 +31,44 @@ func CreateSchool(r *gin.Engine, db *database.DB) {
 			return
 		}
 		c.JSON(200, gin.H{
-			"message": "pong",
+			"message": "School Successfully created",
+		})
+	})
+}
+
+func GetSchool(r *gin.Engine, db *database.DB) {
+	r.GET("/school/:id", func(c *gin.Context) {
+		schoolId, err := strconv.ParseInt(c.Param("id"), 10, 64)
+		if err != nil {
+			c.JSON(500, gin.H{
+				"message": "Wrong ID format",
+			})
+			return
+		}
+		school, err := db.GetSchool(schoolId)
+		if err != nil {
+			c.JSON(500, gin.H{
+				"message": "Error getting school",
+			})
+			return
+		}
+		c.JSON(200, gin.H{
+			"school": school,
+		})
+	})
+}
+
+func GetSchools(r *gin.Engine, db *database.DB) {
+	r.GET("/schools", func(c *gin.Context) {
+		schools, err := db.GetSchools()
+		if err != nil {
+			c.JSON(500, gin.H{
+				"message": "Error getting schools",
+			})
+			return
+		}
+		c.JSON(200, gin.H{
+			"schools": schools,
 		})
 	})
 }

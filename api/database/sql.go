@@ -40,6 +40,8 @@ func (d *DB) CreateTables() {
 		(*models.Class)(nil),
 		(*models.Course)(nil),
 		(*models.Note)(nil),
+		(*models.School)(nil),
+		(*models.SchoolLogin)(nil),
 	}
 
 	for _, model := range models {
@@ -142,4 +144,24 @@ func (d *DB) AddLogin(model *models.SchoolLogin) error {
 		return err
 	}
 	return nil
+}
+
+func (d *DB) GetSchool(id int64) (models.School, error) {
+	ctx := context.Background()
+	var school models.School
+	err := d.db.NewSelect().Model(&school).Where("id = ?", id).Scan(ctx)
+	if err != nil {
+		return school, err
+	}
+	return school, nil
+}
+
+func (d *DB) GetSchools() ([]models.School, error) {
+	ctx := context.Background()
+	var schools []models.School
+	err := d.db.NewSelect().Model(&schools).Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return schools, nil
 }
