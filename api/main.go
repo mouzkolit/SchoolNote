@@ -30,7 +30,13 @@ func main() {
 		fmt.Println(err)
 	}
 	r := gin.Default()
-	r.Use(cors.Default())
+
+	config := cors.DefaultConfig()
+	config.AllowAllOrigins = false
+	config.AllowOrigins = append(config.AllowOrigins, "http://localhost:5173")
+	config.AllowCredentials = true
+	r.Use(cors.New(config))
+
 	r.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	routing.CreatePupil(r, db)
 	routing.GetPupil(r, db)
@@ -38,9 +44,19 @@ func main() {
 	routing.CreateSchool(r, db)
 	routing.GetSchool(r, db)
 	routing.GetSchools(r, db)
+	routing.SchoolLogin(r, db)
 	r.Run(":8080")
 }
 
+// func setupCors() gin.HandlerFunc {
+// 	config := cors.DefaultConfig()
+// 	config.AllowOrigins = []string{"http://localhost:5173"} // Your frontend URL
+// 	config.AllowCredentials = true
+// 	return cors.New(config)
+// }
+
+// InitializeDB initializes the Sqlite database for now
+// this will be replaced with a postgres database sitting on Azure Cloud
 func InitializeDB() (*database.DB, error) {
 	db, err := database.NewDB()
 	if err != nil {

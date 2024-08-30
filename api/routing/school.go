@@ -2,6 +2,7 @@ package routing
 
 import (
 	"log"
+	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -23,7 +24,7 @@ func CreateSchool(r *gin.Engine, db *database.DB) {
 			})
 			return
 		}
-		err = CreateSchoolLogin(db, name)
+		pwd, err := CreateSchoolLogin(db, name)
 		if err != nil {
 			c.JSON(500, gin.H{
 				"message": "Error creating school login",
@@ -31,7 +32,7 @@ func CreateSchool(r *gin.Engine, db *database.DB) {
 			return
 		}
 		c.JSON(200, gin.H{
-			"message": "School Successfully created",
+			"message": "School Successfully created with password: " + pwd,
 		})
 	})
 }
@@ -95,6 +96,7 @@ func SchoolLogin(r *gin.Engine, db *database.DB) {
 			}
 
 			// Set the cookie
+			c.SetSameSite(http.SameSiteLaxMode)
 			c.SetCookie(
 				"access_token",
 				accessToken,
@@ -126,7 +128,7 @@ func generateAccessToken(schoolName string) (string, error) {
 func CheckSchoolLogin(db *database.DB, name string, password string) (bool, error) {
 	success, err := db.GetLogin(name, password)
 	if err != nil {
-		log.Fatal("Login check failed")
+		log.Printf("Login check failed: %v", err)
 		return success, err
 	}
 	return success, nil
@@ -137,11 +139,11 @@ func GenerateAccessToken() (string, error) {
 	return "herewego", nil
 }
 
-func CreateSchoolLogin(db *database.DB, name string) error {
+func CreateSchoolLogin(db *database.DB, name string) (string, error) {
 	autoPwd, err := generateRandomPassword()
 	if err != nil {
 		// here needs to be a return statement
-		return err
+		return "", err
 	}
 	// Create a new school login
 	new_model := &models.SchoolLogin{
@@ -149,7 +151,7 @@ func CreateSchoolLogin(db *database.DB, name string) error {
 		Password:   autoPwd,
 	}
 	db.AddLogin(new_model)
-	return nil
+	return autoPwd, nil
 }
 
 func generateRandomPassword() (string, error) {

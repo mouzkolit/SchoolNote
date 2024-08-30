@@ -21,6 +21,8 @@
         const response = await fetch(url, {
             method: "POST",
         });
+        const data = await response.json();
+        console.log(data);
     }
 </script>
 

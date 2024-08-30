@@ -23,7 +23,7 @@
                     Add School
                 </NavLi>
                 <NavLi
-                    href="/docs/components/navbar"
+                    href="/login"
                     class="hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium"
                 >
                     Login
