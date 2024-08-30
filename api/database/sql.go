@@ -165,3 +165,13 @@ func (d *DB) GetSchools() ([]models.School, error) {
 	}
 	return schools, nil
 }
+
+func (d *DB) GetLogin(name string, password string) (bool, error) {
+	ctx := context.Background()
+	var login models.SchoolLogin
+	err := d.db.NewSelect().Model(&login).Where("name = ?", name).Where("password = ?", password).Scan(ctx)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}

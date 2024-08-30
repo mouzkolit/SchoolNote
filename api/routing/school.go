@@ -73,6 +73,70 @@ func GetSchools(r *gin.Engine, db *database.DB) {
 	})
 }
 
+func SchoolLogin(r *gin.Engine, db *database.DB) {
+	r.POST("/school/login", func(c *gin.Context) {
+		name := c.Query("name")
+		password := c.Query("password")
+		success, err := CheckSchoolLogin(db, name, password)
+		if err != nil {
+			c.JSON(500, gin.H{
+				"message": "Error checking school login",
+			})
+			return
+		}
+		if success {
+			// Generate an access token (you'll need to implement this)
+			accessToken, err := generateAccessToken(name)
+			if err != nil {
+				c.JSON(500, gin.H{
+					"message": "Error generating access token",
+				})
+				return
+			}
+
+			// Set the cookie
+			c.SetCookie(
+				"access_token",
+				accessToken,
+				3600,  // Max age in seconds (1 hour)
+				"/",   // Path
+				"",    // Domain
+				false, // Secure (set to true if using HTTPS)
+				true,  // HttpOnly
+			)
+
+			c.JSON(200, gin.H{
+				"message": "Login successful",
+			})
+		} else {
+			c.JSON(401, gin.H{
+				"message": "Invalid credentials",
+			})
+		}
+	})
+}
+
+// Add this function to generate an access token
+func generateAccessToken(schoolName string) (string, error) {
+	// Implement your token generation logic here
+	// This is just a placeholder
+	return "sample_access_token_for_" + schoolName, nil
+}
+
+func CheckSchoolLogin(db *database.DB, name string, password string) (bool, error) {
+	success, err := db.GetLogin(name, password)
+	if err != nil {
+		log.Fatal("Login check failed")
+		return success, err
+	}
+	return success, nil
+}
+
+func GenerateAccessToken() (string, error) {
+	// we need to implement here logic around the oAuth scheme
+	return "herewego", nil
+}
+
 func CreateSchoolLogin(db *database.DB, name string) error {
 	autoPwd, err := generateRandomPassword()
 	if err != nil {
@@ -89,10 +153,6 @@ func CreateSchoolLogin(db *database.DB, name string) error {
 }
 
 func generateRandomPassword() (string, error) {
-	// Generate a random password
-	// Implement your logic here to generate a random password
-	// For example, you can use a library like "github.com/sethvargo/go-password/password" to generate a random password
-	// Make sure to import the necessary package and call the appropriate function
 	res, err := password.Generate(20, 10, 10, false, false)
 	if err != nil {
 		log.Fatal(err)
