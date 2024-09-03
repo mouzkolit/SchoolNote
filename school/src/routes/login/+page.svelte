@@ -1,72 +1,52 @@
 <script lang="ts">
-    import { Section, Register } from "flowbite-svelte-blocks";
-    import { Button, Checkbox, Label, Input } from "flowbite-svelte";
-    import { LanguageOutline } from "flowbite-svelte-icons";
+    import { onMount } from "svelte";
 
-    let schoolName: string = "";
-    let password: string = "";
-
-    async function login() {
-        var url = new URL("http://localhost:8080/school/login");
-        var params = {
-            name: schoolName,
-            password: password,
-        };
-        url.search = new URLSearchParams(params).toString();
-        const response = await fetch(url, {
-            method: "POST",
-        });
+    interface School {
+        id: number;
+        name: string;
     }
+
+    let selectedSchool: School | null = null;
+    let schools: School[] = [];
+
+    const getSchools = async () => {
+        const response = await fetch("http://localhost:8080/schools");
+        const data = await response.json();
+        console.log(data);
+        schools = data.schools.map((school: any) => ({
+            id: school.ID,
+            name: school.Name,
+        }));
+        console.log(schools);
+    };
+
+    onMount(async () => {
+        await getSchools();
+    });
 </script>
 
-<Section name="login">
-    <Register href="/">
-        <div class="p-6 space-y-4 md:space-y-6 sm:p-8">
-            <form class="flex flex-col space-y-6" action="/">
-                <h3
-                    class="text-xl font-medium text-gray-900 dark:text-white p-0"
-                >
-                    Change Password
-                </h3>
-                <Label class="space-y-2">
-                    <span>School Name</span>
-                    <Input
-                        type="text"
-                        name="schoolName"
-                        placeholder="enter"
-                        required
-                        bind:value={schoolName}
-                    />
-                </Label>
-                <Label class="space-y-2">
-                    <span>Your password</span>
-                    <Input
-                        type="password"
-                        name="password"
-                        placeholder="•••••"
-                        required
-                        bind:value={password}
-                    />
-                </Label>
-                <div class="flex items-start">
-                    <Checkbox>Remember me</Checkbox>
-                    <a
-                        href="/"
-                        class="ml-auto text-sm text-blue-700 hover:underline dark:text-blue-500"
-                        >Forgot password?</a
-                    >
-                </div>
-                <Button type="submit" class="w-full1" on:click={login}
-                    >Sign in</Button
-                >
-                <p class="text-sm font-light text-gray-500 dark:text-gray-400">
-                    Don’t have a School Account yet? <a
-                        href="/school"
-                        class="font-medium text-primary-600 hover:underline dark:text-primary-500"
-                        >Sign up</a
-                    >
-                </p>
-            </form>
-        </div>
-    </Register>
-</Section>
+<div class="flex justify-center items-center h-screen">
+    <div class="bg-gray-100 rounded-lg p-6 shadow-md w-80">
+        <h2 class="text-2xl font-bold text-center mb-6">School Selection</h2>
+        <form class="flex flex-col">
+            <label for="school" class="mb-2">Select School:</label>
+            <select
+                id="school"
+                bind:value={selectedSchool}
+                class="mb-4 p-2 border border-gray-300 rounded"
+            >
+                <option value={null} disabled>Choose a school</option>
+                {#each schools as school (school.id)}
+                    <option value={school}>{school.name}</option>
+                {/each}
+            </select>
+        </form>
+
+        {#if selectedSchool}
+            <p class="text-center mt-4">You selected: {selectedSchool.name}</p>
+        {/if}
+        <button class="bg-blue-500 text-white p-2 rounded mt-4"
+            >Login into Dashboard</button
+        >
+    </div>
+</div>
