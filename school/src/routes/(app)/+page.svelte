@@ -5,15 +5,23 @@
         HeroHeader,
         HeroBody,
     } from "flowbite-svelte-blocks";
+    import schoolAd from "$lib/assets/schoolnote_home.jpg";
     import { Button } from "flowbite-svelte";
     import { ArrowRightOutline } from "flowbite-svelte-icons";
 </script>
 
-<Section name="heroVisual">
-    <div class="mr-auto place-self-center lg:col-span-7">
+<Section name="heroVisual" class="relative">
+    <div class="absolute inset-0 z-0">
+        <img
+            src={schoolAd}
+            alt="School Ad"
+            class="w-full h-full object-cover"
+        />
+    </div>
+    <div class="relative z-10 mr-auto place-self-center lg:col-span-7">
         <HeroHeader
-            h1Class="max-w-2xl mb-4 text-4xl font-extrabold tracking-tight leading-none md:text-5xl xl:text-6xl dark:text-white"
-            pClass="max-w-2xl mb-6 font-light text-gray-500 lg:mb-8 md:text-lg lg:text-xl dark:text-gray-400"
+            h1Class="max-w-2xl mb-4 text-4xl font-extrabold tracking-tight leading-none md:text-5xl xl:text-6xl text-white"
+            pClass="max-w-2xl mb-6 font-light text-gray-200 lg:mb-8 md:text-lg lg:text-xl"
         >
             <svelte:fragment slot="h1"
                 >School Software for Parents, Pupils and Teachers</svelte:fragment

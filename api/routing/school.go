@@ -8,14 +8,36 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/mouzkolit/GOCli/database"
 	"github.com/mouzkolit/GOCli/models"
-	"github.com/sethvargo/go-password/password"
+	"golang.org/x/crypto/bcrypt"
 )
 
+type Bearer struct {
+	AccessToken string `json:"access_token"`
+}
+
+type SchoolInfo struct {
+	Username   string
+	Role       string
+	SchoolName string
+	SchoolID   int
+}
+
+// CreateSchool             godoc
+// @Summary      Create School
+// @Description  Creates a new school in the system
+// @Tags         School
+// @Produce      json
+// @Param        name query string true "Name of the School"
+// @Param        place query string true "Place of the School"
+// @Param        web query string true "Website of the School"
+// @Success      200   {object}  models.SchoolResponse
+// @Router       /school [post]
 func CreateSchool(r *gin.Engine, db *database.DB) {
 	r.POST("/school", func(c *gin.Context) {
 		name := c.Query("name")
 		schoolPlace := c.Query("place")
 		schoolWeb := c.Query("web")
+		password := c.Query("password")
 
 		err := db.CreateSchool(name, schoolPlace, schoolWeb)
 		if err != nil {
@@ -24,7 +46,7 @@ func CreateSchool(r *gin.Engine, db *database.DB) {
 			})
 			return
 		}
-		pwd, err := CreateSchoolLogin(db, name)
+		pwd, err := CreateSchoolLogin(db, name, password)
 		if err != nil {
 			c.JSON(500, gin.H{
 				"message": "Error creating school login",
@@ -37,6 +59,14 @@ func CreateSchool(r *gin.Engine, db *database.DB) {
 	})
 }
 
+// GetSchool             godoc
+// @Summary      Get School
+// @Description  Gets a school by ID
+// @Tags         School
+// @Produce      json
+// @Param        id path string true "ID of the School"
+// @Success      200   {object}  models.SchoolResponse
+// @Router       /school/:id [get]
 func GetSchool(r *gin.Engine, db *database.DB) {
 	r.GET("/school/:id", func(c *gin.Context) {
 		schoolId, err := strconv.ParseInt(c.Param("id"), 10, 64)
@@ -59,6 +89,13 @@ func GetSchool(r *gin.Engine, db *database.DB) {
 	})
 }
 
+// GetSchools             godoc
+// @Summary      Create School Class
+// @Description  Creates a new school class in the system
+// @Tags         School
+// @Produce      json
+// @Success      200   {object}  models.SchoolResponse
+// @Router       /schools [get]
 func GetSchools(r *gin.Engine, db *database.DB) {
 	r.GET("/schools", func(c *gin.Context) {
 		schools, err := db.GetSchools()
@@ -74,6 +111,15 @@ func GetSchools(r *gin.Engine, db *database.DB) {
 	})
 }
 
+// SchoolLogin             godoc
+// @Summary      School Login
+// @Description  Logs in a school
+// @Tags         School
+// @Param        name query string true "Name of the School"
+// @Param        password query string true "Password of the School"
+// @Produce      json
+// @Success      200   {object}  models.SchoolResponse
+// @Router       /school/login [post]
 func SchoolLogin(r *gin.Engine, db *database.DB) {
 	r.POST("/school/login", func(c *gin.Context) {
 		name := c.Query("name")
@@ -100,11 +146,11 @@ func SchoolLogin(r *gin.Engine, db *database.DB) {
 			c.SetCookie(
 				"access_token",
 				accessToken,
-				3600,  // Max age in seconds (1 hour)
-				"/",   // Path
-				"",    // Domain
-				false, // Secure (set to true if using HTTPS)
-				true,  // HttpOnly
+				3600,        // Max age in seconds (1 hour)
+				"/",         // Path
+				"localhost", // Domain
+				false,       // Secure (set to true if using HTTPS)
+				true,        // HttpOnly
 			)
 
 			c.JSON(200, gin.H{
@@ -139,8 +185,8 @@ func GenerateAccessToken() (string, error) {
 	return "herewego", nil
 }
 
-func CreateSchoolLogin(db *database.DB, name string) (string, error) {
-	autoPwd, err := generateRandomPassword()
+func CreateSchoolLogin(db *database.DB, name string, password string) (string, error) {
+	autoPwd, err := generateHashFromPassword(password)
 	if err != nil {
 		// here needs to be a return statement
 		return "", err
@@ -154,11 +200,12 @@ func CreateSchoolLogin(db *database.DB, name string) (string, error) {
 	return autoPwd, nil
 }
 
-func generateRandomPassword() (string, error) {
-	res, err := password.Generate(20, 10, 10, false, false)
+func generateHashFromPassword(password string) (string, error) {
+	// hash the password
+	hashedPwd, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		log.Fatal(err)
 		return "", err
 	}
-	return res, nil
+	return string(hashedPwd), nil
 }

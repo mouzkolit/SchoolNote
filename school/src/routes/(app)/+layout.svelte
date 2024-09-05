@@ -1,5 +1,5 @@
 <script>
-    import "../app.css";
+    import "../../app.css";
     import { Navbar, NavLi, NavUl } from "flowbite-svelte";
 </script>
 

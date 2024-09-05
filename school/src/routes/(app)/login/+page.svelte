@@ -1,9 +1,10 @@
 <script lang="ts">
     import { onMount } from "svelte";
+    import { goto } from "$app/navigation";
 
     interface School {
-        id: number;
-        name: string;
+        ID: number;
+        Name: string;
     }
 
     let selectedSchool: School | null = null;
@@ -11,13 +12,24 @@
 
     const getSchools = async () => {
         const response = await fetch("http://localhost:8080/schools");
+        console.log(response);
         const data = await response.json();
         console.log(data);
         schools = data.schools.map((school: any) => ({
-            id: school.ID,
-            name: school.Name,
+            ID: school.ID,
+            Name: school.Name,
         }));
-        console.log(schools);
+    };
+
+    const goToDashboard = () => {
+        if (selectedSchool) {
+            console.log(selectedSchool);
+            goto("/dashboard/", {
+                state: selectedSchool,
+            });
+        } else {
+            alert("Please select a school before proceeding to the dashboard.");
+        }
     };
 
     onMount(async () => {
@@ -36,17 +48,20 @@
                 class="mb-4 p-2 border border-gray-300 rounded"
             >
                 <option value={null} disabled>Choose a school</option>
-                {#each schools as school (school.id)}
-                    <option value={school}>{school.name}</option>
+                {#each schools as school (school.ID)}
+                    <option value={school}>{school.Name}</option>
                 {/each}
             </select>
         </form>
 
         {#if selectedSchool}
-            <p class="text-center mt-4">You selected: {selectedSchool.name}</p>
+            <p class="text-center mt-4">You selected: {selectedSchool.Name}</p>
         {/if}
-        <button class="bg-blue-500 text-white p-2 rounded mt-4"
-            >Login into Dashboard</button
+        <button
+            class="bg-blue-500 text-white p-2 rounded mt-4 w-full hover:bg-blue-600"
+            on:click={goToDashboard}
         >
+            Go to Dashboard
+        </button>
     </div>
 </div>
