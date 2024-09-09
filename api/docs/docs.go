@@ -61,7 +61,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "pupil"
+                    "Pupil"
                 ],
                 "summary": "Retrieves a pupil from the path",
                 "parameters": [
@@ -105,12 +105,143 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/school": {
+            "post": {
+                "description": "Creates a new school in the system",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "School"
+                ],
+                "summary": "Create School",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Name of the School",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Place of the School",
+                        "name": "place",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Website of the School",
+                        "name": "web",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.SchoolResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/school/:id": {
+            "get": {
+                "description": "Gets a school by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "School"
+                ],
+                "summary": "Get School",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID of the School",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.SchoolResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/school/login": {
+            "post": {
+                "description": "Logs in a school",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "School"
+                ],
+                "summary": "School Login",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Name of the School",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Password of the School",
+                        "name": "password",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.SchoolResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/schools": {
+            "get": {
+                "description": "Creates a new school class in the system",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "School"
+                ],
+                "summary": "Create School Class",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.SchoolResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
         "models.PupilResponse": {
             "type": "object",
             "properties": {
+                "birthday": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -118,6 +249,23 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.SchoolResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "location": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "schoolWeb": {
                     "type": "string"
                 }
             }

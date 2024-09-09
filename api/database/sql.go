@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log"
 	"time"
 
@@ -10,15 +11,27 @@ import (
 	"github.com/mouzkolit/GOCli/models"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/sqlitedialect"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type DB struct {
 	db *bun.DB
 }
 
+// InitializeDB initializes the Sqlite database for now
+// this will be replaced with a postgres database sitting on Azure Cloud
+func InitializeDB() (*DB, error) {
+	db, err := NewDB()
+	if err != nil {
+		fmt.Println(err)
+	}
+	db.InitSchema()
+	return db, err
+}
+
 // initializes a new database in memory
 func NewDB() (*DB, error) {
-	sqldb, err := sql.Open("sqlite3", "file::memory:?cache=shared")
+	sqldb, err := sql.Open("sqlite3", "school.db")
 	db := bun.NewDB(sqldb, sqlitedialect.New())
 	if err != nil {
 		return nil, err
@@ -27,8 +40,13 @@ func NewDB() (*DB, error) {
 	return &DB{db: db}, nil
 }
 
-func (d *DB) Close() error {
-	return d.db.Close()
+func Close(db *DB) error {
+	return db.db.Close()
+}
+
+func (d *DB) getContext() context.Context {
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	return ctx
 }
 
 // Creates the base tables for the application
@@ -45,24 +63,32 @@ func (d *DB) InitSchema() {
 	}
 
 	for _, model := range models {
-		res, err := d.db.NewCreateTable().Model(model).Exec(ctx)
+		exists, err := d.db.NewSelect().Model(model).Exists(ctx)
 		if err != nil {
-			log.Fatalf("Failed to create table for model %T: %v", model, err)
+			log.Printf("Error checking if table exists for model %T: %v", model, err)
 		}
-		log.Printf("Table created for model %T: %v", model, res)
-	}
 
+		if !exists {
+			_, err := d.db.NewCreateTable().Model(model).IfNotExists().Exec(ctx)
+			if err != nil {
+				log.Printf("Error creating table for model %T: %v", model, err)
+			} else {
+				log.Printf("Table created for model %T", model)
+			}
+		} else {
+			log.Printf("Table already exists for model %T", model)
+		}
+	}
 }
 
 // Creates a new School in the shared database
 func (d *DB) CreateSchool(name string, place string, web string) error {
-	ctx := context.Background()
 	school := &models.School{
 		Name:      name,
 		Location:  place,
 		SchoolWeb: web,
 	}
-	_, err := d.db.NewInsert().Model(school).Exec(ctx)
+	_, err := d.db.NewInsert().Model(school).Exec(d.getContext())
 	if err != nil {
 		return err
 	}
@@ -71,13 +97,12 @@ func (d *DB) CreateSchool(name string, place string, web string) error {
 
 // Inserts a new Pupil in the shared database
 func (d *DB) InsertPupil(name string, lastName string) {
-	ctx := context.Background()
 	pupil := &models.Pupil{
 		Name:     name,
 		LastName: lastName,
 		Birthday: time.Now(),
 	}
-	res, err := d.db.NewInsert().Model(pupil).Exec(ctx)
+	res, err := d.db.NewInsert().Model(pupil).Exec(d.getContext())
 	if err != nil {
 		panic(err)
 	}
@@ -87,12 +112,11 @@ func (d *DB) InsertPupil(name string, lastName string) {
 
 // Inserts a new Class in the shared database
 func (d *DB) InsertClass(name string, schoolID int64) error {
-	ctx := context.Background()
 	class := &models.Class{
 		Class:    name,
 		SchoolID: schoolID,
 	}
-	_, err := d.db.NewInsert().Model(class).Exec(ctx)
+	_, err := d.db.NewInsert().Model(class).Exec(d.getContext())
 	if err != nil {
 		return err
 	}
@@ -101,14 +125,13 @@ func (d *DB) InsertClass(name string, schoolID int64) error {
 
 // Inserts a new Teacher in the shared database
 func (d *DB) CreateTeacher(name string, lastName string, classID int64, schoolID int64) {
-	ctx := context.Background()
 	teacher := &models.Teacher{
 		Name:     name,
 		LastName: lastName,
 		ClassID:  classID,
 		SchoolID: schoolID,
 	}
-	res, err := d.db.NewInsert().Model(teacher).Exec(ctx)
+	res, err := d.db.NewInsert().Model(teacher).Exec(d.getContext())
 	if err != nil {
 		panic(err)
 	}
@@ -117,9 +140,8 @@ func (d *DB) CreateTeacher(name string, lastName string, classID int64, schoolID
 
 // Retrieves all Pupils from the database
 func (d *DB) GetPupils() ([]models.Pupil, error) {
-	ctx := context.Background()
 	var pupils []models.Pupil
-	err := d.db.NewSelect().Model(&pupils).Scan(ctx)
+	err := d.db.NewSelect().Model(&pupils).Scan(d.getContext())
 	if err != nil {
 		return nil, err
 	}
@@ -128,9 +150,8 @@ func (d *DB) GetPupils() ([]models.Pupil, error) {
 
 // Retrieves a Pupil from the database
 func (d *DB) GetPupil(id int64) (models.Pupil, error) {
-	ctx := context.Background()
 	var pupil models.Pupil
-	err := d.db.NewSelect().Model(&pupil).Where("id = ?", id).Scan(ctx)
+	err := d.db.NewSelect().Model(&pupil).Where("id = ?", id).Scan(d.getContext())
 	if err != nil {
 		return pupil, err
 	}
@@ -138,8 +159,7 @@ func (d *DB) GetPupil(id int64) (models.Pupil, error) {
 }
 
 func (d *DB) AddLogin(model *models.SchoolLogin) error {
-	ctx := context.Background()
-	_, err := d.db.NewInsert().Model(model).Exec(ctx)
+	_, err := d.db.NewInsert().Model(model).Exec(d.getContext())
 	if err != nil {
 		return err
 	}
@@ -147,9 +167,8 @@ func (d *DB) AddLogin(model *models.SchoolLogin) error {
 }
 
 func (d *DB) GetSchool(id int64) (models.School, error) {
-	ctx := context.Background()
 	var school models.School
-	err := d.db.NewSelect().Model(&school).Where("id = ?", id).Scan(ctx)
+	err := d.db.NewSelect().Model(&school).Where("id = ?", id).Scan(d.getContext())
 	if err != nil {
 		return school, err
 	}
@@ -157,11 +176,23 @@ func (d *DB) GetSchool(id int64) (models.School, error) {
 }
 
 func (d *DB) GetSchools() ([]models.School, error) {
-	ctx := context.Background()
 	var schools []models.School
-	err := d.db.NewSelect().Model(&schools).Scan(ctx)
+	err := d.db.NewSelect().Model(&schools).Scan(d.getContext())
 	if err != nil {
 		return nil, err
 	}
 	return schools, nil
+}
+
+func (d *DB) GetLogin(name string, password string) (bool, error) {
+	var login models.SchoolLogin
+	err := d.db.NewSelect().Model(&login).Where("school_name = ?", name).Scan(d.getContext())
+	if err != nil {
+		return false, err
+	}
+	err = bcrypt.CompareHashAndPassword([]byte(login.Password), []byte(password))
+	if err != nil {
+		return false, nil
+	}
+	return true, nil
 }

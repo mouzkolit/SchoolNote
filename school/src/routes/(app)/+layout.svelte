@@ -1,6 +1,6 @@
 <script>
-    import "../app.css";
-    import { Navbar, NavLi, NavUl, NavHamburger } from "flowbite-svelte";
+    import "../../app.css";
+    import { Navbar, NavLi, NavUl } from "flowbite-svelte";
 </script>
 
 <div class="relative px-8">
@@ -23,7 +23,7 @@
                     Add School
                 </NavLi>
                 <NavLi
-                    href="/docs/components/navbar"
+                    href="/login"
                     class="hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium"
                 >
                     Login
@@ -34,6 +34,11 @@
                 >
                     Pricing
                 </NavLi>
+                <NavLi
+                    href="/contact"
+                    class="hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium"
+                    >Contact</NavLi
+                >
             </NavUl>
         </div>
     </Navbar>

@@ -25,27 +25,34 @@ import (
 // @host      localhost:8080
 // @BasePath  /
 func main() {
-	db, err := InitializeDB()
+	db, err := database.InitializeDB()
 	if err != nil {
 		fmt.Println(err)
 	}
 	r := gin.Default()
-	r.Use(cors.Default())
+	config, err := initConfig()
+	r.Use(cors.New(config))
+
+	// enable the swagger ui for testing
 	r.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	// routing will be performmed here
 	routing.CreatePupil(r, db)
 	routing.GetPupil(r, db)
 	routing.GetPupils(r, db)
 	routing.CreateSchool(r, db)
 	routing.GetSchool(r, db)
 	routing.GetSchools(r, db)
+	routing.SchoolLogin(r, db)
 	r.Run(":8080")
 }
 
-func InitializeDB() (*database.DB, error) {
-	db, err := database.NewDB()
-	if err != nil {
-		fmt.Println(err)
-	}
-	db.InitSchema()
-	return db, err
+func initConfig() (cors.Config, error) {
+	config := cors.DefaultConfig()
+	config.AllowOrigins = []string{"http://localhost:5173", "http://localhost:8080"} // Remove the "*" at the end
+	config.AllowMethods = []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"}
+	config.AllowHeaders = []string{"Origin", "Content-Type", "Accept", "Authorization", "X-Requested-With"}
+	config.ExposeHeaders = []string{"Content-Length", "Set-Cookie"}
+	config.AllowCredentials = true
+	return config, nil
 }

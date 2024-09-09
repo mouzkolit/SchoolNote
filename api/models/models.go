@@ -12,6 +12,16 @@ type SchoolLogin struct {
 	Password   string
 }
 
+type SchoolAdmin struct {
+	ID       int64 `bun:",pk,autoincrement"`
+	SchoolID int64 `bun:"type:int,notnull"`
+	School   *School
+	Name     string
+	LastName string
+	Email    string
+	Password string
+}
+
 type School struct {
 	ID        int64 `bun:",pk,autoincrement"`
 	Name      string
@@ -77,4 +87,19 @@ type SchoolDocumentation struct {
 	ID            int64 `bun:",pk,autoincrement"`
 	Documentation string
 	SchoolID      int64 `bun:"type:int,notnull"` // Foreign key to School
+}
+
+type Message struct {
+	ID       int64 `bun:",pk,autoincrement"`
+	Sender   string
+	Receiver string
+	Message  string
+	Date     time.Time
+}
+
+type Document struct {
+	ID      int64 `bun:",pk,autoincrement"`
+	Title   string
+	Content string
+	Date    time.Time
 }

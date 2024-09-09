@@ -2,11 +2,24 @@ basePath: /
 definitions:
   models.PupilResponse:
     properties:
+      birthday:
+        type: string
       id:
         type: integer
       lastName:
         type: string
       name:
+        type: string
+    type: object
+  models.SchoolResponse:
+    properties:
+      id:
+        type: integer
+      location:
+        type: string
+      name:
+        type: string
+      schoolWeb:
         type: string
     type: object
 host: localhost:8080
@@ -60,7 +73,7 @@ paths:
             $ref: '#/definitions/models.PupilResponse'
       summary: Retrieves a pupil from the path
       tags:
-      - pupil
+      - Pupil
   /pupils:
     get:
       description: Retrieves all Pupils from the school
@@ -76,4 +89,89 @@ paths:
       summary: Retrieves all Pupils
       tags:
       - Pupils
+  /school:
+    post:
+      description: Creates a new school in the system
+      parameters:
+      - description: Name of the School
+        in: query
+        name: name
+        required: true
+        type: string
+      - description: Place of the School
+        in: query
+        name: place
+        required: true
+        type: string
+      - description: Website of the School
+        in: query
+        name: web
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.SchoolResponse'
+      summary: Create School
+      tags:
+      - School
+  /school/:id:
+    get:
+      description: Gets a school by ID
+      parameters:
+      - description: ID of the School
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.SchoolResponse'
+      summary: Get School
+      tags:
+      - School
+  /school/login:
+    post:
+      description: Logs in a school
+      parameters:
+      - description: Name of the School
+        in: query
+        name: name
+        required: true
+        type: string
+      - description: Password of the School
+        in: query
+        name: password
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.SchoolResponse'
+      summary: School Login
+      tags:
+      - School
+  /schools:
+    get:
+      description: Creates a new school class in the system
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.SchoolResponse'
+      summary: Create School Class
+      tags:
+      - School
 swagger: "2.0"
