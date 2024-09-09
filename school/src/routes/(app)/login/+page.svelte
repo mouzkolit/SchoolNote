@@ -1,6 +1,7 @@
 <script lang="ts">
     import { onMount } from "svelte";
     import { goto } from "$app/navigation";
+    import { schoolStore } from "$lib/schoolStore";
 
     interface School {
         ID: number;
@@ -31,6 +32,13 @@
             alert("Please select a school before proceeding to the dashboard.");
         }
     };
+
+    $: if (selectedSchool) {
+        schoolStore.set({
+            schoolName: selectedSchool.Name,
+            schoolId: selectedSchool.ID.toString(),
+        });
+    }
 
     onMount(async () => {
         await getSchools();

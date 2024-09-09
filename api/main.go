@@ -25,7 +25,7 @@ import (
 // @host      localhost:8080
 // @BasePath  /
 func main() {
-	db, err := InitializeDB()
+	db, err := database.InitializeDB()
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -55,15 +55,4 @@ func initConfig() (cors.Config, error) {
 	config.ExposeHeaders = []string{"Content-Length", "Set-Cookie"}
 	config.AllowCredentials = true
 	return config, nil
-}
-
-// InitializeDB initializes the Sqlite database for now
-// this will be replaced with a postgres database sitting on Azure Cloud
-func InitializeDB() (*database.DB, error) {
-	db, err := database.NewDB()
-	if err != nil {
-		fmt.Println(err)
-	}
-	db.InitSchema()
-	return db, err
 }

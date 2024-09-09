@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log"
 	"time"
 
@@ -17,6 +18,17 @@ type DB struct {
 	db *bun.DB
 }
 
+// InitializeDB initializes the Sqlite database for now
+// this will be replaced with a postgres database sitting on Azure Cloud
+func InitializeDB() (*DB, error) {
+	db, err := NewDB()
+	if err != nil {
+		fmt.Println(err)
+	}
+	db.InitSchema()
+	return db, err
+}
+
 // initializes a new database in memory
 func NewDB() (*DB, error) {
 	sqldb, err := sql.Open("sqlite3", "school.db")
@@ -28,8 +40,8 @@ func NewDB() (*DB, error) {
 	return &DB{db: db}, nil
 }
 
-func (d *DB) Close() error {
-	return d.db.Close()
+func Close(db *DB) error {
+	return db.db.Close()
 }
 
 func (d *DB) getContext() context.Context {

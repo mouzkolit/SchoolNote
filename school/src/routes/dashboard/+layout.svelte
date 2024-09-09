@@ -1,13 +1,13 @@
 <script>
     import "../../app.css";
     import Sidebar from "./components/sidebar.svelte";
+
+    let isOpen = false;
 </script>
 
-<div class="flex flex-col h-screen">
-    <div class="flex flex-1">
-        <Sidebar />
-        <main class="flex-1 overflow-y-auto">
-            <slot />
-        </main>
-    </div>
-</div>
+<Sidebar bind:isOpen>
+    <main class="p-4">
+        <!-- Your main dashboard content goes here -->
+        <slot></slot>
+    </main>
+</Sidebar>
