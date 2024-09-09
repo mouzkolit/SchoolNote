@@ -30,16 +30,13 @@ func main() {
 		fmt.Println(err)
 	}
 	r := gin.Default()
-
-	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{"http://localhost:5173", "http://localhost:8080"} // Remove the "*" at the end
-	config.AllowMethods = []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"}
-	config.AllowHeaders = []string{"Origin", "Content-Type", "Accept", "Authorization", "X-Requested-With"}
-	config.ExposeHeaders = []string{"Content-Length", "Set-Cookie"}
-	config.AllowCredentials = true
+	config, err := initConfig()
 	r.Use(cors.New(config))
 
+	// enable the swagger ui for testing
 	r.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	// routing will be performmed here
 	routing.CreatePupil(r, db)
 	routing.GetPupil(r, db)
 	routing.GetPupils(r, db)
@@ -50,12 +47,15 @@ func main() {
 	r.Run(":8080")
 }
 
-// func setupCors() gin.HandlerFunc {
-// 	config := cors.DefaultConfig()
-// 	config.AllowOrigins = []string{"http://localhost:5173"} // Your frontend URL
-// 	config.AllowCredentials = true
-// 	return cors.New(config)
-// }
+func initConfig() (cors.Config, error) {
+	config := cors.DefaultConfig()
+	config.AllowOrigins = []string{"http://localhost:5173", "http://localhost:8080"} // Remove the "*" at the end
+	config.AllowMethods = []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"}
+	config.AllowHeaders = []string{"Origin", "Content-Type", "Accept", "Authorization", "X-Requested-With"}
+	config.ExposeHeaders = []string{"Content-Length", "Set-Cookie"}
+	config.AllowCredentials = true
+	return config, nil
+}
 
 // InitializeDB initializes the Sqlite database for now
 // this will be replaced with a postgres database sitting on Azure Cloud

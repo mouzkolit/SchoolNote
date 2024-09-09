@@ -1,6 +1,7 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
     import { Label, Input, Button } from "flowbite-svelte";
+    import { isAuthenticated, currentSchool } from "$lib/authStore";
 
     let schoolName: string | null = null;
     let password: string | null = null;
@@ -21,9 +22,12 @@
             credentials: "include",
         });
         const data = await response.json();
-        if (data.success) {
+        console.log(data);
+        if (data.message == "Login successful") {
             console.log("Login successful");
-            goto(`/dashboard/${schoolName}`);
+            isAuthenticated.set(true);
+            currentSchool.set(schoolName);
+            //goto(`/dashboard/${schoolName}`);
         } else {
             console.log("Login failed");
         }
