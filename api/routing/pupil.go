@@ -1,7 +1,9 @@
 package routing
 
 import (
+	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/mouzkolit/GOCli/database"
@@ -25,6 +27,15 @@ func CreatePupil(r *gin.Engine, db *database.DB) {
 		c.JSON(200, gin.H{
 			"message": "pong",
 		})
+	})
+}
+
+// UploadPupil godoc
+func CreatePupilFromExcel(r *gin.Engine, db *database.DB) {
+	r.POST("/pupil/upload", func(c *gin.Context) {
+		file, _ := c.FormFile("file")
+		fileExt := strings.ToLower(filepath.Ext(file.Filename))
+		println(fileExt)
 	})
 }
 

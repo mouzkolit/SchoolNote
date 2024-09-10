@@ -1,11 +1,14 @@
 package routing
 
 import (
+	"errors"
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt"
 	"github.com/mouzkolit/GOCli/database"
 	"github.com/mouzkolit/GOCli/models"
 	"golang.org/x/crypto/bcrypt"
@@ -124,65 +127,83 @@ func SchoolLogin(r *gin.Engine, db *database.DB) {
 	r.POST("/school/login", func(c *gin.Context) {
 		name := c.Query("name")
 		password := c.Query("password")
-		success, err := CheckSchoolLogin(db, name, password)
-		if err != nil {
+		success := CheckSchoolLogin(db, name, password)
+		if success.err != nil {
 			c.JSON(500, gin.H{
 				"message": "Error checking school login",
 			})
 			return
 		}
-		if success {
-			// Generate an access token (you'll need to implement this)
-			accessToken, err := generateAccessToken(name)
-			if err != nil {
-				c.JSON(500, gin.H{
-					"message": "Error generating access token",
-				})
-				return
-			}
 
-			// Set the cookie
-			c.SetSameSite(http.SameSiteLaxMode)
-			c.SetCookie(
-				"access_token",
-				accessToken,
-				3600,        // Max age in seconds (1 hour)
-				"/",         // Path
-				"localhost", // Domain
-				false,       // Secure (set to true if using HTTPS)
-				true,        // HttpOnly
-			)
+		// Set the cookie
+		c.SetSameSite(http.SameSiteLaxMode)
+		c.SetCookie(
+			"access_token",
+			success.token,
+			3600,        // Max age in seconds (1 hour)
+			"/",         // Path
+			"localhost", // Domain
+			false,       // Secure (set to true if using HTTPS)
+			true,        // HttpOnly
+		)
 
-			c.JSON(200, gin.H{
-				"message": "Login successful",
-			})
-		} else {
-			c.JSON(401, gin.H{
-				"message": "Invalid credentials",
-			})
-		}
+		c.JSON(200, gin.H{
+			"message": "Login successful",
+		})
 	})
 }
 
-// Add this function to generate an access token
-func generateAccessToken(schoolName string) (string, error) {
-	// Implement your token generation logic here
-	// This is just a placeholder
-	return "sample_access_token_for_" + schoolName, nil
+type loginErr struct {
+	token string
+	err   error
 }
 
-func CheckSchoolLogin(db *database.DB, name string, password string) (bool, error) {
+// Add this function to generate an access token
+func CheckSchoolLogin(db *database.DB, name string, password string) loginErr {
 	success, err := db.GetLogin(name, password)
 	if err != nil {
 		log.Printf("Login check failed: %v", err)
-		return success, err
+		return loginErr{
+			token: "",
+			err:   err,
+		}
 	}
-	return success, nil
+
+	if success {
+		token, err := generateAccessToken(name)
+		if err != nil {
+			log.Printf("Login check failed: %v", err)
+			return loginErr{
+				token: "",
+				err:   err,
+			}
+		}
+		return loginErr{
+			token: token,
+			err:   nil,
+		}
+	}
+
+	return loginErr{
+		token: "",
+		err:   errors.New("Invalid Credentials"),
+	}
 }
 
-func GenerateAccessToken() (string, error) {
+func generateAccessToken(schoolName string) (string, error) {
 	// we need to implement here logic around the oAuth scheme
-	return "herewego", nil
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
+		jwt.MapClaims{
+			"schoolName": schoolName,
+			"exp":        time.Now().Add(time.Hour * 2).Unix(),
+		})
+
+	secretKey := []byte("hellohereweare")
+	tokenString, err := token.SignedString(secretKey)
+	if err != nil {
+		return "", err
+	}
+	return tokenString, nil
 }
 
 func CreateSchoolLogin(db *database.DB, name string, password string) (string, error) {
