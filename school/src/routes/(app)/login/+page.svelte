@@ -12,7 +12,9 @@
     let schools: School[] = [];
 
     const getSchools = async () => {
-        const response = await fetch("http://localhost:8080/schools");
+        const response = await fetch("http://localhost:8080/schools", {
+            credentials: "include",
+        });
         console.log(response);
         const data = await response.json();
         console.log(data);

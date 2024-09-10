@@ -16,7 +16,7 @@ import (
 // @Param        name path string true "Name of the Pupil"
 // @Success      200   {object}  models.PupilResponse
 // @Router       /pupil [post]
-func CreateClass(r *gin.Engine, db *database.DB) {
+func CreateClass(r *gin.RouterGroup, db *database.DB) {
 	r.POST("/:school_id/:class", func(c *gin.Context) {
 		name := c.Param("name")
 		schoolID, err := strconv.ParseInt(c.Param("schoolID"), 10, 64)

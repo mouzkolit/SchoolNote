@@ -2,9 +2,11 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt"
 	"github.com/mouzkolit/GOCli/database"
 	_ "github.com/mouzkolit/GOCli/docs"
 	"github.com/mouzkolit/GOCli/routing"
@@ -32,21 +34,26 @@ func main() {
 	r := gin.Default()
 	config, err := initConfig()
 	r.Use(cors.New(config))
-
+	public := r.Group("/")
+	private := r.Group("/")
+	private.Use(checkJWT())
 	// enable the swagger ui for testing
-	r.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	public.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
+	//public endpoints
+	routing.CreateSchool(public, db)
+	routing.SchoolLogin(public, db)
 	// routing will be performmed here
+
+	//private endpoints
 	routing.CreatePupil(r, db)
 	routing.GetPupil(r, db)
 	routing.GetPupils(r, db)
 
-	routing.CreateSchool(r, db)
 	routing.GetSchool(r, db)
-	routing.GetSchools(r, db)
-	routing.SchoolLogin(r, db)
+	routing.GetSchools(private, db)
 
-	routing.CreateClass(r, db)
+	routing.CreateClass(private, db)
 
 	routing.GetCourse(r, db)
 	routing.CreateCourse(r, db)
@@ -62,4 +69,24 @@ func initConfig() (cors.Config, error) {
 	config.ExposeHeaders = []string{"Content-Length", "Set-Cookie"}
 	config.AllowCredentials = true
 	return config, nil
+}
+
+func checkJWT() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		tokenString, err := c.Cookie("access_token")
+		if tokenString == "" || err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+			c.Abort()
+			return
+		}
+		// here the token should be validated
+		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+			return []byte("hellohereweare"), nil
+		})
+		if err != nil || !token.Valid {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+			return
+		}
+		c.Next()
+	}
 }
