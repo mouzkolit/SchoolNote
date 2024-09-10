@@ -196,3 +196,10 @@ func (d *DB) GetLogin(name string, password string) (bool, error) {
 	}
 	return true, nil
 }
+
+func (d *DB) GetCourse(id int, className string) (*models.Course, error) {
+	var course models.Course
+	err := d.db.NewSelect().Model(&course).Where("id = ?", id)
+	println(err)
+	return &course, nil
+}
