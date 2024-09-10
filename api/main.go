@@ -40,10 +40,17 @@ func main() {
 	routing.CreatePupil(r, db)
 	routing.GetPupil(r, db)
 	routing.GetPupils(r, db)
+
 	routing.CreateSchool(r, db)
 	routing.GetSchool(r, db)
 	routing.GetSchools(r, db)
 	routing.SchoolLogin(r, db)
+
+	routing.CreateClass(r, db)
+
+	routing.GetCourse(r, db)
+	routing.CreateCourse(r, db)
+
 	r.Run(":8080")
 }
 

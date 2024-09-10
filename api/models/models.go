@@ -105,5 +105,7 @@ type Document struct {
 }
 
 type CourseAllocation struct {
-	ID int64 `bun:",pk,autoincrement"`
+	ID         int64 `bun:",pk,autoincrement"`
+	CourseType string
+	percentage float32
 }
