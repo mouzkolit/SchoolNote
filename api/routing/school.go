@@ -35,7 +35,7 @@ type SchoolInfo struct {
 // @Param        web query string true "Website of the School"
 // @Success      200   {object}  models.SchoolResponse
 // @Router       /school [post]
-func CreateSchool(r *gin.Engine, db *database.DB) {
+func CreateSchool(r *gin.RouterGroup, db *database.DB) {
 	r.POST("/school", func(c *gin.Context) {
 		name := c.Query("name")
 		schoolPlace := c.Query("place")
@@ -70,7 +70,7 @@ func CreateSchool(r *gin.Engine, db *database.DB) {
 // @Param        id path string true "ID of the School"
 // @Success      200   {object}  models.SchoolResponse
 // @Router       /school/:id [get]
-func GetSchool(r *gin.Engine, db *database.DB) {
+func GetSchool(r *gin.RouterGroup, db *database.DB) {
 	r.GET("/school/:id", func(c *gin.Context) {
 		schoolId, err := strconv.ParseInt(c.Param("id"), 10, 64)
 		if err != nil {
@@ -99,7 +99,7 @@ func GetSchool(r *gin.Engine, db *database.DB) {
 // @Produce      json
 // @Success      200   {object}  models.SchoolResponse
 // @Router       /schools [get]
-func GetSchools(r *gin.Engine, db *database.DB) {
+func GetSchools(r *gin.RouterGroup, db *database.DB) {
 	r.GET("/schools", func(c *gin.Context) {
 		schools, err := db.GetSchools()
 		if err != nil {
@@ -123,7 +123,7 @@ func GetSchools(r *gin.Engine, db *database.DB) {
 // @Produce      json
 // @Success      200   {object}  models.SchoolResponse
 // @Router       /school/login [post]
-func SchoolLogin(r *gin.Engine, db *database.DB) {
+func SchoolLogin(r *gin.RouterGroup, db *database.DB) {
 	r.POST("/school/login", func(c *gin.Context) {
 		name := c.Query("name")
 		password := c.Query("password")

@@ -1,6 +1,7 @@
 package database
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/mouzkolit/GOCli/models"
@@ -47,6 +48,16 @@ func (d *DB) InsertClass(name string, schoolID int64) error {
 		return err
 	}
 	return nil
+}
+
+func (d *DB) GetClasses(schoolID int64) ([]models.Class, error) {
+	var classes []models.Class
+	err := d.db.NewSelect().Model(&classes).Where("school_id = ?", schoolID)
+	if err != nil {
+		return classes, fmt.Errorf("iderror: no classes found for this id")
+	}
+
+	return classes, nil
 }
 
 // Inserts a new Teacher in the shared database

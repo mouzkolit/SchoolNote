@@ -34,7 +34,7 @@
     }
 </script>
 
-<div class="mt-2 flex items-center justify-center p-4">
+<div class="mt-8 flex items-center justify-center h-screen">
     <div class="bg-gray-200 p-8 rounded shadow-lg w-full max-w-md">
         <form>
             <div class="mb-6">

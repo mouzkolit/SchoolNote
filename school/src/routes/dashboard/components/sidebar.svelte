@@ -8,9 +8,6 @@
         SidebarGroup,
         SidebarItem,
         SidebarWrapper,
-        Heading,
-        Span,
-        Label,
         Button,
     } from "flowbite-svelte";
     import {
@@ -19,97 +16,99 @@
         HomeSolid,
         BarsOutline,
     } from "flowbite-svelte-icons";
+
     $: activeUrl = $page.url.pathname;
     $: schoolName = $schoolStore.schoolName;
-    $: schoolId = $schoolStore.schoolId;
 
+    let activeClass =
+        "flex items-center p-2 text-base font-normal text-primary-900 bg-primary-200 dark:bg-primary-700 rounded-lg dark:text-white hover:bg-primary-100 dark:hover:bg-gray-700";
+    let nonActiveClass =
+        "flex items-center p-2 text-base font-normal text-white-100 rounded-lg dark:text-white hover:bg-green-100 dark:hover:bg-green-700";
+
+    export let isOpen = true;
     const toggleSidebar = () => (isOpen = !isOpen);
-
-    // Add this line to export the isOpen variable
-    export let isOpen = false;
 </script>
 
-<div class="flex">
-    <Sidebar
-        {activeUrl}
-        class="transition-transform duration-300 ease-in-out {isOpen
-            ? 'translate-x-0'
-            : '-translate-x-full'}"
+<div class="flex h-screen w-full relative">
+    <div
+        class="transition-all duration-300 ease-in-out {isOpen
+            ? 'w-64'
+            : 'w-16'}"
     >
-        <SidebarWrapper
-            class="bg-blue-200 h-screen fixed left-0 top-0 flex-col"
-        >
-            <Button
-                class="absolute top-4 right-4 transition-opacity duration-300 ease-in-out bg-blue-300 "
-                aria-label="Toggle sidebar"
-                on:click={toggleSidebar}
-            >
-                <BarsOutline class="w-5 h-5" />
-            </Button>
-            <div>
-                <Heading
-                    tag="h1"
-                    class="mb-4 p-4"
-                    customSize="text-3xl font-extrabold md:text-5xl lg:text-6xl"
+        <Sidebar {activeUrl} class="h-full" {activeClass} {nonActiveClass}>
+            <SidebarWrapper class="bg-gray-800 text-white h-full flex flex-col">
+                <div
+                    class="flex items-center justify-between p-4 border-b border-gray-700"
                 >
-                    <Span gradient>Admin</Span>.
-                </Heading>
-                <Label>School Name: {schoolName}</Label>
-                <SidebarGroup>
+                    {#if isOpen}
+                        <span class="text-2xl font-bold">SchoolNote</span>
+                    {/if}
+                    <Button
+                        class="p-1 hover:bg-gray-700 rounded-full"
+                        color="none"
+                        on:click={toggleSidebar}
+                    >
+                        <BarsOutline class="w-6 h-6" />
+                    </Button>
+                </div>
+                {#if isOpen}
+                    <div class="p-4 border-b border-gray-700">
+                        <p class="text-sm text-gray-400">School</p>
+                        <p class="font-semibold">{schoolName}</p>
+                    </div>
+                {/if}
+                <SidebarGroup class="flex-grow">
                     {#if !$isAuthenticated}
-                        <SidebarItem label="Login" href="/dashboard/login">
+                        <SidebarItem
+                            label={isOpen ? "Login" : ""}
+                            href="/dashboard/login"
+                            color="white"
+                        >
                             <svelte:fragment slot="icon">
-                                <ArrowRightToBracketOutline
-                                    class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
-                                />
+                                <ArrowRightToBracketOutline class="w-5 h-5" />
                             </svelte:fragment>
                         </SidebarItem>
                     {:else}
-                        <SidebarItem label="Logged In as {$currentSchool}">
+                        <SidebarItem
+                            label={isOpen ? "Dashboard" : ""}
+                            href="/dashboard"
+                            color="white"
+                        >
                             <svelte:fragment slot="icon">
-                                <ChartPieSolid
-                                    class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
-                                />
+                                <ChartPieSolid class="w-5 h-5" />
                             </svelte:fragment>
                         </SidebarItem>
-                        <SidebarItem label="Dashboard">
+                        <SidebarItem
+                            label={isOpen ? "Classes" : ""}
+                            href="/dashboard/class"
+                            color="white"
+                        >
                             <svelte:fragment slot="icon">
-                                <ChartPieSolid
-                                    class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
-                                />
+                                <HomeSolid class="w-5 h-5" />
                             </svelte:fragment>
                         </SidebarItem>
-                        <SidebarItem label="Add a Class" href="/dashboard/class"
-                        ></SidebarItem>
                     {/if}
                 </SidebarGroup>
-            </div>
+                <div class="p-4 border-t border-gray-700">
+                    <SidebarItem
+                        label={isOpen ? "Home" : ""}
+                        href="/"
+                        color="white"
+                    >
+                        <svelte:fragment slot="icon">
+                            <HomeSolid class="w-5 h-5" />
+                        </svelte:fragment>
+                    </SidebarItem>
+                </div>
+            </SidebarWrapper>
+        </Sidebar>
+    </div>
 
-            <div class="mt-auto">
-                <SidebarItem label="back to Webpage" href="/">
-                    <svelte:fragment slot="icon">
-                        <HomeSolid
-                            class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
-                        />
-                    </svelte:fragment>
-                </SidebarItem>
+    <div class="flex-grow flex flex-col h-full bg-gray-100 overflow-x-hidden">
+        <div class="p-4 flex-grow">
+            <div class="mt-12">
+                <slot />
             </div>
-        </SidebarWrapper>
-    </Sidebar>
-
-    <div
-        class="flex-grow transition-all duration-300 ease-in-out"
-        class:ml-64={isOpen}
-    >
-        <slot></slot>
+        </div>
     </div>
 </div>
-
-<Button
-    class="fixed top-4 left-4 z-20 transition-all duration-300 ease-in-out bg-blue-300 {isOpen
-        ? 'hidden'
-        : ''}"
-    on:click={toggleSidebar}
->
-    <BarsOutline class="w-5 h-5" />
-</Button>
