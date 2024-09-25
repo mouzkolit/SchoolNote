@@ -32,7 +32,7 @@ func main() {
 		fmt.Println(err)
 	}
 	r := gin.Default()
-	config, err := initConfig()
+	config, _ := initConfig()
 	r.Use(cors.New(config))
 	public := r.Group("/")
 	private := r.Group("/")
@@ -50,8 +50,8 @@ func main() {
 	routing.GetPupil(r, db)
 	routing.GetPupils(r, db)
 
-	routing.GetSchool(r, db)
-	routing.GetSchools(private, db)
+	routing.GetSchool(public, db)
+	routing.GetSchools(public, db)
 
 	routing.CreateClass(private, db)
 

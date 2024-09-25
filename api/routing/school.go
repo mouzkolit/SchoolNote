@@ -70,7 +70,7 @@ func CreateSchool(r *gin.RouterGroup, db *database.DB) {
 // @Param        id path string true "ID of the School"
 // @Success      200   {object}  models.SchoolResponse
 // @Router       /school/:id [get]
-func GetSchool(r *gin.Engine, db *database.DB) {
+func GetSchool(r *gin.RouterGroup, db *database.DB) {
 	r.GET("/school/:id", func(c *gin.Context) {
 		schoolId, err := strconv.ParseInt(c.Param("id"), 10, 64)
 		if err != nil {
