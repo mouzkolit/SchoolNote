@@ -1,6 +1,7 @@
 package routing
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -35,7 +36,7 @@ func CreateClass(r *gin.RouterGroup, db *database.DB) {
 			return
 		}
 		c.JSON(200, gin.H{
-			"message": "Successfully added Class to School",
+			"data": "Successfully added Class to School",
 		})
 	})
 }
@@ -59,15 +60,15 @@ func GetClasses(r *gin.RouterGroup, db *database.DB) {
 			return
 		}
 
-		err = db.GetClasses(schoolID)
+		classes, err := db.GetClasses(schoolID)
 		if err != nil {
 			c.JSON(404, gin.H{
-				"message": "Error inserting class",
+				"message": fmt.Sprintf("Error Fetching classes with error %s", err),
 			})
 			return
 		}
 		c.JSON(200, gin.H{
-			"message": "Successfully added Class to School",
+			"data": classes,
 		})
 	})
 }

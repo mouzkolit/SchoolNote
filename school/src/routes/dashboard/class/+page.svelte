@@ -7,18 +7,45 @@
         Breadcrumb,
         BreadcrumbItem,
     } from "flowbite-svelte";
+    import { schoolStore } from "$lib/schoolStore";
 
+    let currentSchoolId: string = "";
+    schoolStore.subscribe((value) => {
+        currentSchoolId = value.schoolId;
+    })();
     // Placeholder data for classes (replace with actual data fetching logic)
     let className: string = "";
     let teacherFirst: string = "";
     let teacherLast: string = "";
 
-    function addClass() {
+    async function addClass() {
         // Add logic to create a new class
         if (className === "" || teacherFirst === "" || teacherLast === "") {
             alert("Please enter all the necessary information for your class");
         }
-        // Reset input fields
+
+        const response = await fetch(
+            `http://localhost:8080/${currentSchoolId}/classes`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                credentials: "include",
+                body: JSON.stringify({
+                    className: className,
+                    teacherFirst: teacherFirst,
+                    teacherLast: teacherLast,
+                }),
+            },
+        );
+
+        if (response.ok) {
+            const data = await response.json();
+            console.log("Class created successfully:", data);
+        } else {
+            console.error("Failed to create class");
+        }
     }
 </script>
 
